@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💕 A Little Puzzle For You</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#080307;--surface:#140810;--border:#3a1230;--ba:#7a2855;
+  --text:#f0e0d0;--acc:#d4527a;--acc2:#f5a8c8;
+  --green:#2e7e2e;--greenb:#3d9d3d;--yellow:#8c6e10;--yellowb:#bda020;
+  --gray:#383838;--grayb:#525252;
+}
+body{background:var(--bg);background-image:radial-gradient(ellipse 55% 45% at 20% 15%,rgba(90,15,50,.5),transparent),radial-gradient(ellipse 50% 45% at 80% 85%,rgba(60,8,38,.5),transparent);color:var(--text);font-family:'Playfair Display',Georgia,serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:14px 10px 40px;overflow-x:hidden;}
+
+/* HEADER */
+.hd{text-align:center;margin-bottom:12px;}
+.hd-s{font-family:'Great Vibes',cursive;font-size:clamp(1.9rem,5.5vw,2.7rem);color:var(--acc);line-height:1.15;text-shadow:0 0 32px rgba(212,82,122,.4);}
+.hd-q{font-size:clamp(.78rem,2.2vw,.92rem);font-style:italic;color:rgba(240,224,208,.58);margin-top:5px;letter-spacing:.04em;}
+.hd-h{font-size:.68rem;color:rgba(240,224,208,.28);margin-top:4px;letter-spacing:.1em;text-transform:uppercase;}
+.hd-div{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent);margin:10px auto 0;}
+
+/* MSG */
+#msg{min-height:22px;display:flex;align-items:center;justify-content:center;font-size:.86rem;font-style:italic;color:var(--acc2);margin-bottom:6px;transition:opacity .3s;}
+
+/* GRID */
+#grid{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.row{display:flex;gap:5px;}
+.tile{width:45px;height:45px;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:1.22rem;font-weight:700;text-transform:uppercase;color:var(--text);border-radius:4px;transition:border-color .12s;}
+.tile.has-letter{border-color:var(--ba);animation:tpop .1s ease;}
+.tile.correct{background:var(--green);border-color:var(--greenb);color:#fff;}
+.tile.present{background:var(--yellow);border-color:var(--yellowb);color:#fff;}
+.tile.absent{background:var(--gray);border-color:var(--grayb);color:#888;}
+@keyframes tpop{0%{transform:scale(1)}50%{transform:scale(1.13)}100%{transform:scale(1)}}
+.row.shaking{animation:rshk .35s ease;}
+@keyframes rshk{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
+
+/* KEYBOARD */
+#keyboard{display:flex;flex-direction:column;gap:5px;align-items:center;margin-bottom:18px;}
+.kb-row{display:flex;gap:5px;}
+.key{height:42px;min-width:32px;padding:0 5px;background:#1c0a16;border:1px solid #380e2c;color:var(--text);font-family:'Playfair Display',serif;font-size:.76rem;font-weight:600;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-transform:uppercase;transition:background .15s,transform .08s;user-select:none;}
+.key.wide{min-width:50px;font-size:.64rem;}
+.key:hover{background:#280e20;}
+.key:active{transform:scale(.93);}
+.key.correct{background:var(--green);border-color:var(--greenb);}
+.key.present{background:var(--yellow);border-color:var(--yellowb);}
+.key.absent{background:#252525;border-color:#353535;color:#484848;}
+
+/* BOUQUET */
+#bq-wrap{width:100%;max-width:470px;display:flex;flex-direction:column;align-items:center;}
+.bq-cap{font-family:'Great Vibes',cursive;font-size:1.2rem;color:var(--acc);margin-bottom:3px;opacity:0;transform:translateY(8px);transition:opacity 1s,transform 1s;}
+.bq-cap.show{opacity:1;transform:translateY(0);}
+#bq-svg{width:100%;max-width:460px;height:310px;}
+
+/* BLOOM ANIMATION */
+.fblm{transform-box:fill-box;transform-origin:50% 100%;opacity:0;}
+.fblm.go{animation:fbloom 1.5s cubic-bezier(.34,1.48,.64,1) forwards;}
+@keyframes fbloom{0%{transform:scale(0) rotate(-8deg);opacity:0;}60%{transform:scale(1.06) rotate(1.5deg);opacity:1;}100%{transform:scale(1) rotate(0deg);opacity:1;}}
+
+/* WIN OVERLAY */
+#win{display:none;position:fixed;inset:0;background:rgba(6,1,5,.9);z-index:200;align-items:center;justify-content:center;padding:20px;}
+#win.show{display:flex;animation:fi .5s ease;}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.wcard{background:linear-gradient(140deg,#1c0a18,#120610);border:1px solid #7a2855;border-radius:18px;padding:36px 28px 28px;text-align:center;max-width:350px;width:100%;box-shadow:0 0 60px rgba(212,82,122,.25),0 0 120px rgba(212,82,122,.08);}
+.wh{font-size:2rem;margin-bottom:6px;}
+.wt{font-family:'Great Vibes',cursive;font-size:2.4rem;color:var(--acc);line-height:1.1;margin-bottom:8px;text-shadow:0 0 20px rgba(212,82,122,.4);}
+.ww{font-size:2rem;font-weight:700;letter-spacing:.22em;color:#f5d0a0;margin-bottom:16px;text-transform:uppercase;}
+.wm{font-style:italic;color:rgba(240,224,208,.7);line-height:1.8;font-size:.88rem;}
+.wb{margin-top:20px;padding:10px 28px;background:var(--acc);color:#fff;border:none;border-radius:22px;font-family:'Playfair Display',serif;font-size:.86rem;cursor:pointer;transition:background .2s;}
+.wb:hover{background:#e0688a;}
+</style>
+</head>
+<body>
+
+<div id="win">
+  <div class="wcard">
+    <div class="wh">🌹💕🌹</div>
+    <div class="wt">You found him!</div>
+    <div class="ww">Akshatt</div>
+    <div class="wm">The answer was always him — the person who built this puzzle just to spell his name in your heart.<br><br>Every letter you guessed right bloomed a flower for you. This whole bouquet? That's how much he loves you. 💐</div>
+    <button class="wb" onclick="document.getElementById('win').classList.remove('show')">See my bouquet ✨</button>
+  </div>
+</div>
+
+<header class="hd">
+  <div class="hd-s">A little puzzle, just for you</div>
+  <div class="hd-q">" What is something you love? "</div>
+  <div class="hd-h">7 letters &nbsp;·&nbsp; 6 chances &nbsp;·&nbsp; every right letter blooms a flower</div>
+  <div class="hd-div"></div>
+</header>
+
+<div id="msg"></div>
+<div id="grid"></div>
+<div id="keyboard"></div>
+
+<div id="bq-wrap">
+  <div class="bq-cap" id="bqcap">Your bouquet is blooming… 🌸</div>
+
+  <svg id="bq-svg" viewBox="0 0 460 310" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- PETAL GRADIENTS -->
+    <radialGradient id="gRed" cx="38%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#ff7888"/><stop offset="55%" stop-color="#cc1030"/><stop offset="100%" stop-color="#780012"/>
+    </radialGradient>
+    <radialGradient id="gRedD" cx="38%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#ee5870"/><stop offset="55%" stop-color="#aa0820"/><stop offset="100%" stop-color="#580010"/>
+    </radialGradient>
+    <radialGradient id="gRedI" cx="38%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#ff9098"/><stop offset="55%" stop-color="#dd2848"/><stop offset="100%" stop-color="#8a0018"/>
+    </radialGradient>
+    <radialGradient id="gPeo" cx="40%" cy="22%" r="74%">
+      <stop offset="0%" stop-color="#fff4f9"/><stop offset="48%" stop-color="#f8c0d8"/><stop offset="100%" stop-color="#cc6090"/>
+    </radialGradient>
+    <radialGradient id="gPeoD" cx="40%" cy="22%" r="74%">
+      <stop offset="0%" stop-color="#f8d8ec"/><stop offset="48%" stop-color="#e898b8"/><stop offset="100%" stop-color="#b03878"/>
+    </radialGradient>
+    <radialGradient id="gSun" cx="50%" cy="32%" r="70%">
+      <stop offset="0%" stop-color="#fde850"/><stop offset="55%" stop-color="#f0b810"/><stop offset="100%" stop-color="#c07808"/>
+    </radialGradient>
+    <radialGradient id="gSunC" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3c2200"/><stop offset="60%" stop-color="#1e1000"/><stop offset="100%" stop-color="#0e0800"/>
+    </radialGradient>
+    <radialGradient id="gLily" cx="50%" cy="42%" r="64%">
+      <stop offset="0%" stop-color="#fffff2"/><stop offset="65%" stop-color="#efeed8"/><stop offset="100%" stop-color="#d4d4c0"/>
+    </radialGradient>
+    <radialGradient id="gLisian" cx="40%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#ede0ff"/><stop offset="52%" stop-color="#a878de"/><stop offset="100%" stop-color="#5e3eaa"/>
+    </radialGradient>
+    <radialGradient id="gRanun" cx="40%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#ffe8b0"/><stop offset="48%" stop-color="#f07828"/><stop offset="100%" stop-color="#b84018"/>
+    </radialGradient>
+    <radialGradient id="gRanunD" cx="40%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#ffd898"/><stop offset="48%" stop-color="#de6018"/><stop offset="100%" stop-color="#903010"/>
+    </radialGradient>
+    <radialGradient id="gPink" cx="36%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#ffe0f2"/><stop offset="55%" stop-color="#f07ea8"/><stop offset="100%" stop-color="#c03870"/>
+    </radialGradient>
+    <radialGradient id="gPinkD" cx="36%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#ffc8e4"/><stop offset="55%" stop-color="#d85888"/><stop offset="100%" stop-color="#a02858"/>
+    </radialGradient>
+    <!-- FOLIAGE -->
+    <linearGradient id="gLeaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#58a030"/><stop offset="100%" stop-color="#286018"/>
+    </linearGradient>
+    <linearGradient id="gStem" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#286018"/><stop offset="50%" stop-color="#48901c"/><stop offset="100%" stop-color="#306020"/>
+    </linearGradient>
+    <!-- WRAPPER -->
+    <linearGradient id="gWrap" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7a1238"/><stop offset="22%" stop-color="#c02e60"/><stop offset="50%" stop-color="#dc4878"/><stop offset="78%" stop-color="#c02e60"/><stop offset="100%" stop-color="#7a1238"/>
+    </linearGradient>
+    <linearGradient id="gWrapS" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#580e28"/><stop offset="50%" stop-color="#8e1840"/><stop offset="100%" stop-color="#580e28"/>
+    </linearGradient>
+    <linearGradient id="gRib" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff9ec4"/><stop offset="100%" stop-color="#cc4e80"/>
+    </linearGradient>
+    <!-- FILTERS -->
+    <filter id="fDrop" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="1.5" dy="3" stdDeviation="3.5" flood-color="rgba(0,0,0,0.45)"/>
+    </filter>
+    <filter id="fSm" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
+    <filter id="fGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ══════════ FLOWERS — SVG z-order: back → front ══════════ -->
+
+  <!-- ═══ F5: Purple Lisianthus — far right back ═══ -->
+  <g id="f5" visibility="hidden" transform="translate(310,258)">
+   <g class="fblm">
+    <path d="M0,0 Q4,-32 2,-65 Q0,-90 0,-110" stroke="url(#gStem)" stroke-width="2.1" fill="none" stroke-linecap="round"/>
+    <path d="M1,-52 C18,-45 24,-32 14,-26 C7,-21 1,-38 1,-52" fill="url(#gLeaf)"/>
+    <path d="M1,-52 L13,-34" stroke="#2a6018" stroke-width=".7" fill="none" opacity=".45"/>
+    <path d="M0,-75 C-17,-68 -23,-55 -14,-49 C-7,-44 0,-61 0,-75" fill="url(#gLeaf)"/>
+    <g transform="translate(0,-110)">
+      <!-- 5 outer petals -->
+      <g transform="rotate(0)">  <path d="M0,0 C-13,1 -17,-9 -14,-20 Q-11,-30 -5,-33 Q0,-35 5,-33 Q11,-30 14,-20 C17,-9 13,1 0,0" fill="url(#gLisian)" filter="url(#fSm)"/></g>
+      <g transform="rotate(72)"> <path d="M0,0 C-13,1 -17,-9 -14,-20 Q-11,-30 -5,-33 Q0,-35 5,-33 Q11,-30 14,-20 C17,-9 13,1 0,0" fill="url(#gLisian)" filter="url(#fSm)"/></g>
+      <g transform="rotate(144)"><path d="M0,0 C-13,1 -17,-9 -14,-20 Q-11,-30 -5,-33 Q0,-35 5,-33 Q11,-30 14,-20 C17,-9 13,1 0,0" fill="url(#gLisian)" filter="url(#fSm)"/></g>
+      <g transform="rotate(216)"><path d="M0,0 C-13,1 -17,-9 -14,-20 Q-11,-30 -5,-33 Q0,-35 5,-33 Q11,-30 14,-20 C17,-9 13,1 0,0" fill="url(#gLisian)" filter="url(#fSm)"/></g>
+      <g transform="rotate(288)"><path d="M0,0 C-13,1 -17,-9 -14,-20 Q-11,-30 -5,-33 Q0,-35 5,-33 Q11,-30 14,-20 C17,-9 13,1 0,0" fill="url(#gLisian)" filter="url(#fSm)"/></g>
+      <circle cx="0" cy="0" r="7" fill="#9060cc"/>
+      <line x1="0" y1="-2" x2="-4" y2="-12" stroke="#d0a8f8" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="0" y1="-2" x2="0"  y2="-14" stroke="#d0a8f8" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="0" y1="-2" x2="4"  y2="-12" stroke="#d0a8f8" stroke-width="1.2" stroke-linecap="round"/>
+      <circle cx="-4" cy="-12" r="2" fill="#f0e0ff"/>
+      <circle cx="0"  cy="-14" r="2" fill="#f0e0ff"/>
+      <circle cx="4"  cy="-12" r="2" fill="#f0e0ff"/>
+      <path d="M-5,3 Q-8,-1 -4,-3 Q0,0 0,0 Q0,0 4,-3 Q8,-1 5,3" fill="#286018"/>
+    </g>
+   </g>
+  </g>
+
+  <!-- ═══ F4: Sunflower — far left back ═══ -->
+  <g id="f4" visibility="hidden" transform="translate(145,258)">
+   <g class="fblm">
+    <path d="M0,0 Q-6,-38 -3,-78 Q-1,-106 0,-126" stroke="url(#gStem)" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <!-- 2 large leaves -->
+    <path d="M-1,-52 C-28,-43 -36,-26 -23,-19 C-13,-13 -1,-35 -1,-52" fill="url(#gLeaf)"/>
+    <path d="M-1,-52 L-22,-26" stroke="#2a6018" stroke-width=".9" fill="none" opacity=".4"/>
+    <path d="M0,-80 C22,-72 29,-56 18,-49 C10,-43 0,-64 0,-80" fill="url(#gLeaf)"/>
+    <path d="M0,-80 L16,-54" stroke="#2a6018" stroke-width=".9" fill="none" opacity=".4"/>
+    <g transform="translate(0,-126)">
+      <!-- 22 ray petals using bezier petal shape -->
+      <g transform="rotate(0)   translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)"/></g>
+      <g transform="rotate(16.4)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)" opacity=".88"/></g>
+      <g transform="rotate(32.7)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)"/></g>
+      <g transform="rotate(49.1)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)" opacity=".88"/></g>
+      <g transform="rotate(65.5)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)"/></g>
+      <g transform="rotate(81.8)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)" opacity=".88"/></g>
+      <g transform="rotate(98.2)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)"/></g>
+      <g transform="rotate(114.5)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)" opacity=".88"/></g>
+      <g transform="rotate(130.9)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)"/></g>
+      <g transform="rotate(147.3)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)" opacity=".88"/></g>
+      <g transform="rotate(163.6)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)"/></g>
+      <g transform="rotate(180)  translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)" opacity=".88"/></g>
+      <g transform="rotate(196.4)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)"/></g>
+      <g transform="rotate(212.7)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)" opacity=".88"/></g>
+      <g transform="rotate(229.1)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)"/></g>
+      <g transform="rotate(245.5)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)" opacity=".88"/></g>
+      <g transform="rotate(261.8)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)"/></g>
+      <g transform="rotate(278.2)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)" opacity=".88"/></g>
+      <g transform="rotate(294.5)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)"/></g>
+      <g transform="rotate(310.9)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)" opacity=".88"/></g>
+      <g transform="rotate(327.3)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)"/></g>
+      <g transform="rotate(343.6)translate(0,-24)"><path d="M0,4 C-9,3 -12,-12 -10,-27 C-7,-40 0,-48 0,-48 C0,-48 7,-40 10,-27 C12,-12 9,3 0,4" fill="url(#gSun)" opacity=".88"/></g>
+      <!-- seed disk -->
+      <circle cx="0" cy="0" r="26" fill="url(#gSunC)" filter="url(#fDrop)"/>
+      <!-- seed florets outer ring -->
+      <circle cx="0"   cy="-20" r="3.4" fill="#5c3a00"/><circle cx="10"  cy="-17" r="3.4" fill="#4a2c00"/>
+      <circle cx="18"  cy="-9"  r="3.4" fill="#5c3a00"/><circle cx="20"  cy="1"   r="3.4" fill="#4a2c00"/>
+      <circle cx="15"  cy="12"  r="3.4" fill="#5c3a00"/><circle cx="6"   cy="19"  r="3.4" fill="#4a2c00"/>
+      <circle cx="-6"  cy="19"  r="3.4" fill="#5c3a00"/><circle cx="-15" cy="12"  r="3.4" fill="#4a2c00"/>
+      <circle cx="-20" cy="1"   r="3.4" fill="#5c3a00"/><circle cx="-18" cy="-9"  r="3.4" fill="#4a2c00"/>
+      <circle cx="-10" cy="-17" r="3.4" fill="#5c3a00"/>
+      <!-- mid ring -->
+      <circle cx="0"   cy="-12" r="2.6" fill="#6a4208"/><circle cx="7"   cy="-10" r="2.6" fill="#5a3408"/>
+      <circle cx="11"  cy="-3"  r="2.6" fill="#6a4208"/><circle cx="11"  cy="5"   r="2.6" fill="#5a3408"/>
+      <circle cx="6"   cy="11"  r="2.6" fill="#6a4208"/><circle cx="-6"  cy="11"  r="2.6" fill="#5a3408"/>
+      <circle cx="-11" cy="5"   r="2.6" fill="#6a4208"/><circle cx="-11" cy="-3"  r="2.6" fill="#5a3408"/>
+      <circle cx="-7"  cy="-10" r="2.6" fill="#6a4208"/>
+      <!-- center -->
+      <circle cx="0" cy="0" r="7" fill="#251200"/>
+      <path d="M-7,7 Q-11,2 -6,0 Q0,3 0,0 Q0,3 6,0 Q11,2 7,7" fill="#286018"/>
+    </g>
+   </g>
+  </g>
+
+  <!-- ═══ F2: Blush Peony — left ═══ -->
+  <g id="f2" visibility="hidden" transform="translate(187,256)">
+   <g class="fblm">
+    <path d="M0,0 Q5,-33 3,-68 Q1,-92 0,-108" stroke="url(#gStem)" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <path d="M1,-46 C-19,-39 -25,-25 -15,-18 C-8,-13 1,-33 1,-46" fill="url(#gLeaf)"/>
+    <path d="M1,-46 L-13,-24" stroke="#286018" stroke-width=".7" fill="none" opacity=".4"/>
+    <path d="M0,-72 C17,-66 23,-52 13,-46 C7,-41 0,-60 0,-72" fill="url(#gLeaf)"/>
+    <g transform="translate(0,-108)">
+      <!-- 8 guard petals -->
+      <g transform="rotate(0)  translate(0,-18)"><path d="M0,4 C-16,3 -20,-11 -16,-26 Q-12,-39 0,-44 Q12,-39 16,-26 C20,-11 16,3 0,4" fill="url(#gPeo)" filter="url(#fSm)"/></g>
+      <g transform="rotate(45) translate(0,-18)"><path d="M0,4 C-16,3 -20,-11 -16,-26 Q-12,-39 0,-44 Q12,-39 16,-26 C20,-11 16,3 0,4" fill="url(#gPeoD)" filter="url(#fSm)"/></g>
+      <g transform="rotate(90) translate(0,-18)"><path d="M0,4 C-16,3 -20,-11 -16,-26 Q-12,-39 0,-44 Q12,-39 16,-26 C20,-11 16,3 0,4" fill="url(#gPeo)" filter="url(#fSm)"/></g>
+      <g transform="rotate(135)translate(0,-18)"><path d="M0,4 C-16,3 -20,-11 -16,-26 Q-12,-39 0,-44 Q12,-39 16,-26 C20,-11 16,3 0,4" fill="url(#gPeoD)" filter="url(#fSm)"/></g>
+      <g transform="rotate(180)translate(0,-18)"><path d="M0,4 C-16,3 -20,-11 -16,-26 Q-12,-39 0,-44 Q12,-39 16,-26 C20,-11 16,3 0,4" fill="url(#gPeo)" filter="url(#fSm)"/></g>
+      <g transform="rotate(225)translate(0,-18)"><path d="M0,4 C-16,3 -20,-11 -16,-26 Q-12,-39 0,-44 Q12,-39 16,-26 C20,-11 16,3 0,4" fill="url(#gPeoD)" filter="url(#fSm)"/></g>
+      <g transform="rotate(270)translate(0,-18)"><path d="M0,4 C-16,3 -20,-11 -16,-26 Q-12,-39 0,-44 Q12,-39 16,-26 C20,-11 16,3 0,4" fill="url(#gPeo)" filter="url(#fSm)"/></g>
+      <g transform="rotate(315)translate(0,-18)"><path d="M0,4 C-16,3 -20,-11 -16,-26 Q-12,-39 0,-44 Q12,-39 16,-26 C20,-11 16,3 0,4" fill="url(#gPeoD)" filter="url(#fSm)"/></g>
+      <circle cx="0" cy="0" r="21" fill="#f0b0cc"/>
+      <!-- 10 mid petals -->
+      <g transform="rotate(0)  translate(0,-10)"><path d="M0,3 C-12,2 -15,-8 -12,-18 Q-9,-26 0,-29 Q9,-26 12,-18 C15,-8 12,2 0,3" fill="#f8d2ea"/></g>
+      <g transform="rotate(36) translate(0,-10)"><path d="M0,3 C-12,2 -15,-8 -12,-18 Q-9,-26 0,-29 Q9,-26 12,-18 C15,-8 12,2 0,3" fill="#f4cae4"/></g>
+      <g transform="rotate(72) translate(0,-10)"><path d="M0,3 C-12,2 -15,-8 -12,-18 Q-9,-26 0,-29 Q9,-26 12,-18 C15,-8 12,2 0,3" fill="#f8d2ea"/></g>
+      <g transform="rotate(108)translate(0,-10)"><path d="M0,3 C-12,2 -15,-8 -12,-18 Q-9,-26 0,-29 Q9,-26 12,-18 C15,-8 12,2 0,3" fill="#f4cae4"/></g>
+      <g transform="rotate(144)translate(0,-10)"><path d="M0,3 C-12,2 -15,-8 -12,-18 Q-9,-26 0,-29 Q9,-26 12,-18 C15,-8 12,2 0,3" fill="#f8d2ea"/></g>
+      <g transform="rotate(180)translate(0,-10)"><path d="M0,3 C-12,2 -15,-8 -12,-18 Q-9,-26 0,-29 Q9,-26 12,-18 C15,-8 12,2 0,3" fill="#f4cae4"/></g>
+      <g transform="rotate(216)translate(0,-10)"><path d="M0,3 C-12,2 -15,-8 -12,-18 Q-9,-26 0,-29 Q9,-26 12,-18 C15,-8 12,2 0,3" fill="#f8d2ea"/></g>
+      <g transform="rotate(252)translate(0,-10)"><path d="M0,3 C-12,2 -15,-8 -12,-18 Q-9,-26 0,-29 Q9,-26 12,-18 C15,-8 12,2 0,3" fill="#f4cae4"/></g>
+      <g transform="rotate(288)translate(0,-10)"><path d="M0,3 C-12,2 -15,-8 -12,-18 Q-9,-26 0,-29 Q9,-26 12,-18 C15,-8 12,2 0,3" fill="#f8d2ea"/></g>
+      <g transform="rotate(324)translate(0,-10)"><path d="M0,3 C-12,2 -15,-8 -12,-18 Q-9,-26 0,-29 Q9,-26 12,-18 C15,-8 12,2 0,3" fill="#f4cae4"/></g>
+      <circle cx="0" cy="0" r="13" fill="#e898b8"/>
+      <!-- 5 inner -->
+      <g transform="rotate(0)  translate(0,-5)"><path d="M0,2 C-8,1 -10,-6 -8,-13 Q-5,-18 0,-19 Q5,-18 8,-13 C10,-6 8,1 0,2" fill="#ffc8e0"/></g>
+      <g transform="rotate(72) translate(0,-5)"><path d="M0,2 C-8,1 -10,-6 -8,-13 Q-5,-18 0,-19 Q5,-18 8,-13 C10,-6 8,1 0,2" fill="#ffc8e0"/></g>
+      <g transform="rotate(144)translate(0,-5)"><path d="M0,2 C-8,1 -10,-6 -8,-13 Q-5,-18 0,-19 Q5,-18 8,-13 C10,-6 8,1 0,2" fill="#ffd0e8"/></g>
+      <g transform="rotate(216)translate(0,-5)"><path d="M0,2 C-8,1 -10,-6 -8,-13 Q-5,-18 0,-19 Q5,-18 8,-13 C10,-6 8,1 0,2" fill="#ffc8e0"/></g>
+      <g transform="rotate(288)translate(0,-5)"><path d="M0,2 C-8,1 -10,-6 -8,-13 Q-5,-18 0,-19 Q5,-18 8,-13 C10,-6 8,1 0,2" fill="#ffd0e8"/></g>
+      <circle cx="0" cy="0" r="6.5" fill="#c06888"/>
+      <line x1="-2" y1="-4" x2="-3" y2="-10" stroke="#f8b0d0" stroke-width="1" stroke-linecap="round"/>
+      <line x1="0"  y1="-5" x2="0"  y2="-11" stroke="#f8b0d0" stroke-width="1" stroke-linecap="round"/>
+      <line x1="2"  y1="-4" x2="3"  y2="-10" stroke="#f8b0d0" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="-3" cy="-10" r="1.8" fill="#f8d8ec"/>
+      <circle cx="0"  cy="-11" r="1.8" fill="#f8d8ec"/>
+      <circle cx="3"  cy="-10" r="1.8" fill="#f8d8ec"/>
+      <path d="M-5,5 Q-8,0 -4,-2 Q0,1 0,0 Q0,1 4,-2 Q8,0 5,5" fill="#286018"/>
+    </g>
+   </g>
+  </g>
+
+  <!-- ═══ F3: White Lily — right ═══ -->
+  <g id="f3" visibility="hidden" transform="translate(264,256)">
+   <g class="fblm">
+    <path d="M0,0 Q-3,-30 -1,-62 Q0,-88 0,-105" stroke="url(#gStem)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path d="M-1,-48 C-20,-42 -26,-28 -16,-22 C-9,-17 -1,-35 -1,-48" fill="url(#gLeaf)"/>
+    <path d="M0,-73 C18,-67 24,-53 14,-47 C8,-42 0,-60 0,-73" fill="url(#gLeaf)"/>
+    <g transform="translate(0,-105)">
+      <!-- 6 recurved lily petals -->
+      <g transform="rotate(0)">
+        <path d="M0,0 C-11,0 -15,-16 -13,-33 C-11,-49 -3,-57 0,-59 C3,-57 11,-49 13,-33 C15,-16 11,0 0,0" fill="url(#gLily)" filter="url(#fSm)"/>
+        <path d="M0,0 Q-4,-22 -2,-56" stroke="#9868c8" stroke-width="1" fill="none" opacity=".3"/>
+        <path d="M0,0 Q 4,-22  2,-56" stroke="#9868c8" stroke-width="1" fill="none" opacity=".3"/>
+        <circle cx="-5" cy="-28" r="2.4" fill="#7840a0" opacity=".45"/>
+        <circle cx="-8" cy="-38" r="2"   fill="#7840a0" opacity=".4"/>
+        <circle cx="-2" cy="-44" r="1.8" fill="#7840a0" opacity=".4"/>
+        <circle cx="5"  cy="-28" r="2.4" fill="#7840a0" opacity=".45"/>
+        <circle cx="8"  cy="-38" r="2"   fill="#7840a0" opacity=".4"/>
+        <circle cx="2"  cy="-44" r="1.8" fill="#7840a0" opacity=".4"/>
+      </g>
+      <g transform="rotate(60)">
+        <path d="M0,0 C-11,0 -15,-16 -13,-33 C-11,-49 -3,-57 0,-59 C3,-57 11,-49 13,-33 C15,-16 11,0 0,0" fill="url(#gLily)" filter="url(#fSm)"/>
+        <path d="M0,0 Q-4,-22 -2,-56" stroke="#9868c8" stroke-width="1" fill="none" opacity=".25"/>
+        <circle cx="-5" cy="-28" r="2.4" fill="#7840a0" opacity=".38"/>
+        <circle cx="5"  cy="-28" r="2.4" fill="#7840a0" opacity=".38"/>
+      </g>
+      <g transform="rotate(120)">
+        <path d="M0,0 C-11,0 -15,-16 -13,-33 C-11,-49 -3,-57 0,-59 C3,-57 11,-49 13,-33 C15,-16 11,0 0,0" fill="url(#gLily)" filter="url(#fSm)"/>
+        <path d="M0,0 Q-4,-22 -2,-56" stroke="#9868c8" stroke-width="1" fill="none" opacity=".3"/>
+        <path d="M0,0 Q 4,-22  2,-56" stroke="#9868c8" stroke-width="1" fill="none" opacity=".3"/>
+        <circle cx="-5" cy="-28" r="2.4" fill="#7840a0" opacity=".45"/>
+        <circle cx="-8" cy="-38" r="2"   fill="#7840a0" opacity=".4"/>
+        <circle cx="5"  cy="-28" r="2.4" fill="#7840a0" opacity=".45"/>
+        <circle cx="8"  cy="-38" r="2"   fill="#7840a0" opacity=".4"/>
+      </g>
+      <g transform="rotate(180)">
+        <path d="M0,0 C-11,0 -15,-16 -13,-33 C-11,-49 -3,-57 0,-59 C3,-57 11,-49 13,-33 C15,-16 11,0 0,0" fill="url(#gLily)" filter="url(#fSm)"/>
+        <path d="M0,0 Q-4,-22 -2,-56" stroke="#9868c8" stroke-width="1" fill="none" opacity=".25"/>
+        <circle cx="-5" cy="-28" r="2.4" fill="#7840a0" opacity=".38"/>
+        <circle cx="5"  cy="-28" r="2.4" fill="#7840a0" opacity=".38"/>
+      </g>
+      <g transform="rotate(240)">
+        <path d="M0,0 C-11,0 -15,-16 -13,-33 C-11,-49 -3,-57 0,-59 C3,-57 11,-49 13,-33 C15,-16 11,0 0,0" fill="url(#gLily)" filter="url(#fSm)"/>
+        <path d="M0,0 Q-4,-22 -2,-56" stroke="#9868c8" stroke-width="1" fill="none" opacity=".3"/>
+        <path d="M0,0 Q 4,-22  2,-56" stroke="#9868c8" stroke-width="1" fill="none" opacity=".3"/>
+        <circle cx="-5" cy="-28" r="2.4" fill="#7840a0" opacity=".45"/>
+        <circle cx="5"  cy="-28" r="2.4" fill="#7840a0" opacity=".45"/>
+      </g>
+      <g transform="rotate(300)">
+        <path d="M0,0 C-11,0 -15,-16 -13,-33 C-11,-49 -3,-57 0,-59 C3,-57 11,-49 13,-33 C15,-16 11,0 0,0" fill="url(#gLily)" filter="url(#fSm)"/>
+        <path d="M0,0 Q-4,-22 -2,-56" stroke="#9868c8" stroke-width="1" fill="none" opacity=".25"/>
+        <circle cx="-5" cy="-28" r="2.4" fill="#7840a0" opacity=".38"/>
+        <circle cx="5"  cy="-28" r="2.4" fill="#7840a0" opacity=".38"/>
+      </g>
+      <!-- stamens -->
+      <line x1="0" y1="0" x2="-9"  y2="-20" stroke="#b0aa18" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="-5"  y2="-22" stroke="#b0aa18" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="0"   y2="-23" stroke="#b0aa18" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="5"   y2="-22" stroke="#b0aa18" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="9"   y2="-20" stroke="#b0aa18" stroke-width="1.8" stroke-linecap="round"/>
+      <ellipse cx="-9"  cy="-20" rx="3.2" ry="2" fill="#806018" transform="rotate(25,-9,-20)"/>
+      <ellipse cx="-5"  cy="-22" rx="3.2" ry="2" fill="#806018" transform="rotate(10,-5,-22)"/>
+      <ellipse cx="0"   cy="-23" rx="3.2" ry="2" fill="#806018"/>
+      <ellipse cx="5"   cy="-22" rx="3.2" ry="2" fill="#806018" transform="rotate(-10,5,-22)"/>
+      <ellipse cx="9"   cy="-20" rx="3.2" ry="2" fill="#806018" transform="rotate(-25,9,-20)"/>
+      <circle cx="0" cy="0" r="4.5" fill="#e8d050"/>
+      <path d="M-4,4 Q-7,0 -3,-2 Q0,1 0,0 Q0,1 3,-2 Q7,0 4,4" fill="#286018"/>
+    </g>
+   </g>
+  </g>
+
+  <!-- ═══ F6: Burnt Orange Ranunculus — left inner ═══ -->
+  <g id="f6" visibility="hidden" transform="translate(205,254)">
+   <g class="fblm">
+    <path d="M0,0 Q4,-26 2,-56 Q0,-78 0,-93" stroke="url(#gStem)" stroke-width="2.1" fill="none" stroke-linecap="round"/>
+    <path d="M1,-40 C-16,-33 -22,-21 -12,-15 C-6,-10 1,-28 1,-40" fill="url(#gLeaf)"/>
+    <path d="M0,-63 C15,-57 20,-46 12,-41 C6,-37 0,-52 0,-63" fill="url(#gLeaf)"/>
+    <g transform="translate(0,-93)">
+      <!-- outermost 10 petals -->
+      <g transform="rotate(0)  translate(0,-15)"><path d="M0,3 C-10,2 -13,-7 -10,-17 Q-7,-24 0,-26 Q7,-24 10,-17 C13,-7 10,2 0,3" fill="url(#gRanun)" filter="url(#fSm)"/></g>
+      <g transform="rotate(36) translate(0,-15)"><path d="M0,3 C-10,2 -13,-7 -10,-17 Q-7,-24 0,-26 Q7,-24 10,-17 C13,-7 10,2 0,3" fill="url(#gRanunD)" filter="url(#fSm)"/></g>
+      <g transform="rotate(72) translate(0,-15)"><path d="M0,3 C-10,2 -13,-7 -10,-17 Q-7,-24 0,-26 Q7,-24 10,-17 C13,-7 10,2 0,3" fill="url(#gRanun)" filter="url(#fSm)"/></g>
+      <g transform="rotate(108)translate(0,-15)"><path d="M0,3 C-10,2 -13,-7 -10,-17 Q-7,-24 0,-26 Q7,-24 10,-17 C13,-7 10,2 0,3" fill="url(#gRanunD)" filter="url(#fSm)"/></g>
+      <g transform="rotate(144)translate(0,-15)"><path d="M0,3 C-10,2 -13,-7 -10,-17 Q-7,-24 0,-26 Q7,-24 10,-17 C13,-7 10,2 0,3" fill="url(#gRanun)" filter="url(#fSm)"/></g>
+      <g transform="rotate(180)translate(0,-15)"><path d="M0,3 C-10,2 -13,-7 -10,-17 Q-7,-24 0,-26 Q7,-24 10,-17 C13,-7 10,2 0,3" fill="url(#gRanunD)" filter="url(#fSm)"/></g>
+      <g transform="rotate(216)translate(0,-15)"><path d="M0,3 C-10,2 -13,-7 -10,-17 Q-7,-24 0,-26 Q7,-24 10,-17 C13,-7 10,2 0,3" fill="url(#gRanun)" filter="url(#fSm)"/></g>
+      <g transform="rotate(252)translate(0,-15)"><path d="M0,3 C-10,2 -13,-7 -10,-17 Q-7,-24 0,-26 Q7,-24 10,-17 C13,-7 10,2 0,3" fill="url(#gRanunD)" filter="url(#fSm)"/></g>
+      <g transform="rotate(288)translate(0,-15)"><path d="M0,3 C-10,2 -13,-7 -10,-17 Q-7,-24 0,-26 Q7,-24 10,-17 C13,-7 10,2 0,3" fill="url(#gRanun)" filter="url(#fSm)"/></g>
+      <g transform="rotate(324)translate(0,-15)"><path d="M0,3 C-10,2 -13,-7 -10,-17 Q-7,-24 0,-26 Q7,-24 10,-17 C13,-7 10,2 0,3" fill="url(#gRanunD)" filter="url(#fSm)"/></g>
+      <circle cx="0" cy="0" r="16" fill="#df6018"/>
+      <!-- mid 8 petals -->
+      <g transform="rotate(0)  translate(0,-8)"><path d="M0,2 C-8,1 -10,-5 -8,-12 Q-5,-17 0,-18 Q5,-17 8,-12 C10,-5 8,1 0,2" fill="#f08040"/></g>
+      <g transform="rotate(45) translate(0,-8)"><path d="M0,2 C-8,1 -10,-5 -8,-12 Q-5,-17 0,-18 Q5,-17 8,-12 C10,-5 8,1 0,2" fill="#e87030"/></g>
+      <g transform="rotate(90) translate(0,-8)"><path d="M0,2 C-8,1 -10,-5 -8,-12 Q-5,-17 0,-18 Q5,-17 8,-12 C10,-5 8,1 0,2" fill="#f08040"/></g>
+      <g transform="rotate(135)translate(0,-8)"><path d="M0,2 C-8,1 -10,-5 -8,-12 Q-5,-17 0,-18 Q5,-17 8,-12 C10,-5 8,1 0,2" fill="#e87030"/></g>
+      <g transform="rotate(180)translate(0,-8)"><path d="M0,2 C-8,1 -10,-5 -8,-12 Q-5,-17 0,-18 Q5,-17 8,-12 C10,-5 8,1 0,2" fill="#f08040"/></g>
+      <g transform="rotate(225)translate(0,-8)"><path d="M0,2 C-8,1 -10,-5 -8,-12 Q-5,-17 0,-18 Q5,-17 8,-12 C10,-5 8,1 0,2" fill="#e87030"/></g>
+      <g transform="rotate(270)translate(0,-8)"><path d="M0,2 C-8,1 -10,-5 -8,-12 Q-5,-17 0,-18 Q5,-17 8,-12 C10,-5 8,1 0,2" fill="#f08040"/></g>
+      <g transform="rotate(315)translate(0,-8)"><path d="M0,2 C-8,1 -10,-5 -8,-12 Q-5,-17 0,-18 Q5,-17 8,-12 C10,-5 8,1 0,2" fill="#e87030"/></g>
+      <circle cx="0" cy="0" r="9.5" fill="#c04010"/>
+      <!-- inner 5 -->
+      <g transform="rotate(0)  translate(0,-4)"><path d="M0,1 C-5,0 -6,-4 -5,-8 Q-3,-11 0,-12 Q3,-11 5,-8 C6,-4 5,0 0,1" fill="#d86020"/></g>
+      <g transform="rotate(72) translate(0,-4)"><path d="M0,1 C-5,0 -6,-4 -5,-8 Q-3,-11 0,-12 Q3,-11 5,-8 C6,-4 5,0 0,1" fill="#d86020"/></g>
+      <g transform="rotate(144)translate(0,-4)"><path d="M0,1 C-5,0 -6,-4 -5,-8 Q-3,-11 0,-12 Q3,-11 5,-8 C6,-4 5,0 0,1" fill="#e07030"/></g>
+      <g transform="rotate(216)translate(0,-4)"><path d="M0,1 C-5,0 -6,-4 -5,-8 Q-3,-11 0,-12 Q3,-11 5,-8 C6,-4 5,0 0,1" fill="#d86020"/></g>
+      <g transform="rotate(288)translate(0,-4)"><path d="M0,1 C-5,0 -6,-4 -5,-8 Q-3,-11 0,-12 Q3,-11 5,-8 C6,-4 5,0 0,1" fill="#e07030"/></g>
+      <circle cx="0" cy="0" r="4.5" fill="#802808"/>
+      <circle cx="0" cy="0" r="2"   fill="#501808"/>
+      <path d="M-4,4 Q-6,0 -3,-2 Q0,1 0,0 Q0,1 3,-2 Q6,0 4,4" fill="#286018"/>
+    </g>
+   </g>
+  </g>
+
+  <!-- ═══ F7: Pink Rose — right inner ═══ -->
+  <g id="f7" visibility="hidden" transform="translate(256,252)">
+   <g class="fblm">
+    <path d="M0,0 Q-6,-33 -3,-70 Q0,-96 0,-115" stroke="url(#gStem)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <!-- thorns -->
+    <path d="M-2,-38 L-9,-44" stroke="#3a7028" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M-1,-58 L-8,-63" stroke="#3a7028" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M1,-50 L 8,-55" stroke="#3a7028" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M-1,-33 C-22,-26 -28,-13 -18,-6 C-10,-1 -1,-20 -1,-33" fill="url(#gLeaf)"/>
+    <path d="M-1,-33 L-16,-12" stroke="#286018" stroke-width=".7" fill="none" opacity=".4"/>
+    <path d="M1,-63 C20,-57 26,-44 16,-38 C9,-33 1,-52 1,-63" fill="url(#gLeaf)"/>
+    <g transform="translate(0,-115)">
+      <!-- 7 guard petals -->
+      <g transform="rotate(0)   translate(0,-18)"><path d="M0,4 C-14,3 -18,-12 -14,-27 C-10,-40 0,-46 0,-46 C0,-46 10,-40 14,-27 C18,-12 14,3 0,4" fill="url(#gPink)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(51.4) translate(0,-18)"><path d="M0,4 C-14,3 -18,-12 -14,-27 C-10,-40 0,-46 0,-46 C0,-46 10,-40 14,-27 C18,-12 14,3 0,4" fill="url(#gPinkD)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(102.8)translate(0,-18)"><path d="M0,4 C-14,3 -18,-12 -14,-27 C-10,-40 0,-46 0,-46 C0,-46 10,-40 14,-27 C18,-12 14,3 0,4" fill="url(#gPink)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(154.2)translate(0,-18)"><path d="M0,4 C-14,3 -18,-12 -14,-27 C-10,-40 0,-46 0,-46 C0,-46 10,-40 14,-27 C18,-12 14,3 0,4" fill="url(#gPinkD)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(205.6)translate(0,-18)"><path d="M0,4 C-14,3 -18,-12 -14,-27 C-10,-40 0,-46 0,-46 C0,-46 10,-40 14,-27 C18,-12 14,3 0,4" fill="url(#gPink)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(257)  translate(0,-18)"><path d="M0,4 C-14,3 -18,-12 -14,-27 C-10,-40 0,-46 0,-46 C0,-46 10,-40 14,-27 C18,-12 14,3 0,4" fill="url(#gPinkD)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(308.4)translate(0,-18)"><path d="M0,4 C-14,3 -18,-12 -14,-27 C-10,-40 0,-46 0,-46 C0,-46 10,-40 14,-27 C18,-12 14,3 0,4" fill="url(#gPink)" filter="url(#fDrop)"/></g>
+      <circle cx="0" cy="0" r="20" fill="#dd72a0"/>
+      <!-- 5 mid petals -->
+      <g transform="rotate(0)  translate(0,-10)"><path d="M0,3 C-11,2 -14,-8 -11,-19 C-8,-28 0,-33 0,-33 C0,-33 8,-28 11,-19 C14,-8 11,2 0,3" fill="#ffc0da"/></g>
+      <g transform="rotate(72) translate(0,-10)"><path d="M0,3 C-11,2 -14,-8 -11,-19 C-8,-28 0,-33 0,-33 C0,-33 8,-28 11,-19 C14,-8 11,2 0,3" fill="#ffb4d2"/></g>
+      <g transform="rotate(144)translate(0,-10)"><path d="M0,3 C-11,2 -14,-8 -11,-19 C-8,-28 0,-33 0,-33 C0,-33 8,-28 11,-19 C14,-8 11,2 0,3" fill="#ffc0da"/></g>
+      <g transform="rotate(216)translate(0,-10)"><path d="M0,3 C-11,2 -14,-8 -11,-19 C-8,-28 0,-33 0,-33 C0,-33 8,-28 11,-19 C14,-8 11,2 0,3" fill="#ffb4d2"/></g>
+      <g transform="rotate(288)translate(0,-10)"><path d="M0,3 C-11,2 -14,-8 -11,-19 C-8,-28 0,-33 0,-33 C0,-33 8,-28 11,-19 C14,-8 11,2 0,3" fill="#ffc0da"/></g>
+      <circle cx="0" cy="0" r="12" fill="#cb5888"/>
+      <!-- 3 inner -->
+      <g transform="rotate(0)  translate(0,-5)"><path d="M0,2 C-8,1 -10,-6 -8,-13 C-6,-19 0,-21 0,-21 C0,-21 6,-19 8,-13 C10,-6 8,1 0,2" fill="#ffd2ec"/></g>
+      <g transform="rotate(120)translate(0,-5)"><path d="M0,2 C-8,1 -10,-6 -8,-13 C-6,-19 0,-21 0,-21 C0,-21 6,-19 8,-13 C10,-6 8,1 0,2" fill="#ffcce8"/></g>
+      <g transform="rotate(240)translate(0,-5)"><path d="M0,2 C-8,1 -10,-6 -8,-13 C-6,-19 0,-21 0,-21 C0,-21 6,-19 8,-13 C10,-6 8,1 0,2" fill="#ffd2ec"/></g>
+      <circle cx="0" cy="0" r="5.5" fill="#a03060"/>
+      <line x1="-2" y1="-3" x2="-3" y2="-9" stroke="#f8c0dc" stroke-width=".9" stroke-linecap="round"/>
+      <line x1="0"  y1="-4" x2="0"  y2="-10" stroke="#f8c0dc" stroke-width=".9" stroke-linecap="round"/>
+      <line x1="2"  y1="-3" x2="3"  y2="-9" stroke="#f8c0dc" stroke-width=".9" stroke-linecap="round"/>
+      <circle cx="-3" cy="-9"  r="1.7" fill="#f0e0f0"/>
+      <circle cx="0"  cy="-10" r="1.7" fill="#f0e0f0"/>
+      <circle cx="3"  cy="-9"  r="1.7" fill="#f0e0f0"/>
+      <path d="M-5,5 Q-8,0 -4,-2 Q0,2 0,0 Q0,2 4,-2 Q8,0 5,5" fill="#1e5010"/>
+    </g>
+   </g>
+  </g>
+
+  <!-- ═══ F1: Deep Red Rose — center, frontmost ═══ -->
+  <g id="f1" visibility="hidden" transform="translate(230,260)">
+   <g class="fblm">
+    <path d="M0,0 Q-9,-42 -5,-85 Q-1,-110 0,-132" stroke="url(#gStem)" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+    <!-- thorns -->
+    <path d="M-3,-43 L-12,-50" stroke="#3a6e20" stroke-width="2" stroke-linecap="round"/>
+    <path d="M-2,-63 L-11,-70" stroke="#3a6e20" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 1,-54 L 10,-60" stroke="#3a6e20" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 1,-78 L 10,-84" stroke="#3a6e20" stroke-width="2" stroke-linecap="round"/>
+    <!-- main leaf left -->
+    <path d="M-3,-35 C-30,-25 -38,-8 -24,-1 C-13,4 -3,-18 -3,-35" fill="url(#gLeaf)"/>
+    <path d="M-3,-35 L-22,-12" stroke="#286018" stroke-width=".9" fill="none" opacity=".4"/>
+    <!-- leaf vein secondary -->
+    <path d="M-3,-35 L-30,-18" stroke="#1e5010" stroke-width=".5" fill="none" opacity=".3"/>
+    <!-- main leaf right -->
+    <path d="M2,-70 C24,-62 31,-47 20,-40 C12,-34 2,-56 2,-70" fill="url(#gLeaf)"/>
+    <path d="M2,-70 L18,-46" stroke="#286018" stroke-width=".9" fill="none" opacity=".4"/>
+    <!-- small leaf -->
+    <path d="M-2,-95 C-18,-90 -22,-79 -14,-74 C-8,-70 -2,-84 -2,-95" fill="url(#gLeaf)"/>
+
+    <g transform="translate(0,-132)">
+      <!-- 7 outer guard petals (largest) -->
+      <g transform="rotate(0)   translate(0,-21)"><path d="M0,5 C-16,4 -21,-14 -17,-31 C-13,-46 0,-53 0,-53 C0,-53 13,-46 17,-31 C21,-14 16,4 0,5" fill="url(#gRed)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(51.4) translate(0,-21)"><path d="M0,5 C-16,4 -21,-14 -17,-31 C-13,-46 0,-53 0,-53 C0,-53 13,-46 17,-31 C21,-14 16,4 0,5" fill="url(#gRedD)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(102.8)translate(0,-21)"><path d="M0,5 C-16,4 -21,-14 -17,-31 C-13,-46 0,-53 0,-53 C0,-53 13,-46 17,-31 C21,-14 16,4 0,5" fill="url(#gRed)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(154.2)translate(0,-21)"><path d="M0,5 C-16,4 -21,-14 -17,-31 C-13,-46 0,-53 0,-53 C0,-53 13,-46 17,-31 C21,-14 16,4 0,5" fill="url(#gRedD)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(205.6)translate(0,-21)"><path d="M0,5 C-16,4 -21,-14 -17,-31 C-13,-46 0,-53 0,-53 C0,-53 13,-46 17,-31 C21,-14 16,4 0,5" fill="url(#gRed)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(257)  translate(0,-21)"><path d="M0,5 C-16,4 -21,-14 -17,-31 C-13,-46 0,-53 0,-53 C0,-53 13,-46 17,-31 C21,-14 16,4 0,5" fill="url(#gRedD)" filter="url(#fDrop)"/></g>
+      <g transform="rotate(308.4)translate(0,-21)"><path d="M0,5 C-16,4 -21,-14 -17,-31 C-13,-46 0,-53 0,-53 C0,-53 13,-46 17,-31 C21,-14 16,4 0,5" fill="url(#gRed)" filter="url(#fDrop)"/></g>
+      <circle cx="0" cy="0" r="24" fill="#960e1e"/>
+      <!-- 7 mid petals -->
+      <g transform="rotate(0)   translate(0,-13)"><path d="M0,4 C-13,3 -17,-10 -13,-24 C-9,-36 0,-41 0,-41 C0,-41 9,-36 13,-24 C17,-10 13,3 0,4" fill="#d61e3c"/></g>
+      <g transform="rotate(51.4) translate(0,-13)"><path d="M0,4 C-13,3 -17,-10 -13,-24 C-9,-36 0,-41 0,-41 C0,-41 9,-36 13,-24 C17,-10 13,3 0,4" fill="#c81430"/></g>
+      <g transform="rotate(102.8)translate(0,-13)"><path d="M0,4 C-13,3 -17,-10 -13,-24 C-9,-36 0,-41 0,-41 C0,-41 9,-36 13,-24 C17,-10 13,3 0,4" fill="#d61e3c"/></g>
+      <g transform="rotate(154.2)translate(0,-13)"><path d="M0,4 C-13,3 -17,-10 -13,-24 C-9,-36 0,-41 0,-41 C0,-41 9,-36 13,-24 C17,-10 13,3 0,4" fill="#c81430"/></g>
+      <g transform="rotate(205.6)translate(0,-13)"><path d="M0,4 C-13,3 -17,-10 -13,-24 C-9,-36 0,-41 0,-41 C0,-41 9,-36 13,-24 C17,-10 13,3 0,4" fill="#d61e3c"/></g>
+      <g transform="rotate(257)  translate(0,-13)"><path d="M0,4 C-13,3 -17,-10 -13,-24 C-9,-36 0,-41 0,-41 C0,-41 9,-36 13,-24 C17,-10 13,3 0,4" fill="#c81430"/></g>
+      <g transform="rotate(308.4)translate(0,-13)"><path d="M0,4 C-13,3 -17,-10 -13,-24 C-9,-36 0,-41 0,-41 C0,-41 9,-36 13,-24 C17,-10 13,3 0,4" fill="#d61e3c"/></g>
+      <circle cx="0" cy="0" r="15.5" fill="#880c18"/>
+      <!-- 5 inner petals (cupped) -->
+      <g transform="rotate(0)  translate(0,-7)"><path d="M0,3 C-10,2 -13,-7 -10,-16 C-7,-23 0,-26 0,-26 C0,-26 7,-23 10,-16 C13,-7 10,2 0,3" fill="url(#gRedI)"/></g>
+      <g transform="rotate(72) translate(0,-7)"><path d="M0,3 C-10,2 -13,-7 -10,-16 C-7,-23 0,-26 0,-26 C0,-26 7,-23 10,-16 C13,-7 10,2 0,3" fill="url(#gRed)"/></g>
+      <g transform="rotate(144)translate(0,-7)"><path d="M0,3 C-10,2 -13,-7 -10,-16 C-7,-23 0,-26 0,-26 C0,-26 7,-23 10,-16 C13,-7 10,2 0,3" fill="url(#gRedI)"/></g>
+      <g transform="rotate(216)translate(0,-7)"><path d="M0,3 C-10,2 -13,-7 -10,-16 C-7,-23 0,-26 0,-26 C0,-26 7,-23 10,-16 C13,-7 10,2 0,3" fill="url(#gRed)"/></g>
+      <g transform="rotate(288)translate(0,-7)"><path d="M0,3 C-10,2 -13,-7 -10,-16 C-7,-23 0,-26 0,-26 C0,-26 7,-23 10,-16 C13,-7 10,2 0,3" fill="url(#gRedI)"/></g>
+      <circle cx="0" cy="0" r="8.5" fill="#620810"/>
+      <!-- innermost 3 petals -->
+      <g transform="rotate(0)  translate(0,-3)"><path d="M0,1 C-5,0 -7,-5 -5,-10 C-3,-14 0,-15 0,-15 C0,-15 3,-14 5,-10 C7,-5 5,0 0,1" fill="#c41e3c"/></g>
+      <g transform="rotate(120)translate(0,-3)"><path d="M0,1 C-5,0 -7,-5 -5,-10 C-3,-14 0,-15 0,-15 C0,-15 3,-14 5,-10 C7,-5 5,0 0,1" fill="#c41e3c"/></g>
+      <g transform="rotate(240)translate(0,-3)"><path d="M0,1 C-5,0 -7,-5 -5,-10 C-3,-14 0,-15 0,-15 C0,-15 3,-14 5,-10 C7,-5 5,0 0,1" fill="#d02840"/></g>
+      <!-- heart center bud -->
+      <circle cx="0" cy="0" r="4.5" fill="#400608"/>
+      <!-- gold stamens -->
+      <line x1="-2" y1="-3" x2="-3" y2="-8" stroke="#e8bc28" stroke-width="1.1" stroke-linecap="round"/>
+      <line x1="0"  y1="-4" x2="0"  y2="-9" stroke="#e8bc28" stroke-width="1.1" stroke-linecap="round"/>
+      <line x1="2"  y1="-3" x2="3"  y2="-8" stroke="#e8bc28" stroke-width="1.1" stroke-linecap="round"/>
+      <circle cx="-3" cy="-8" r="1.6" fill="#d0a818"/>
+      <circle cx="0"  cy="-9" r="1.6" fill="#d0a818"/>
+      <circle cx="3"  cy="-8" r="1.6" fill="#d0a818"/>
+      <!-- sepal -->
+      <path d="M-6,6 Q-10,1 -5,-2 Q0,2 0,0 Q0,2 5,-2 Q10,1 6,6" fill="#1a4a10"/>
+    </g>
+   </g>
+  </g>
+
+  <!-- ══════════ BOUQUET WRAPPER — always on top ══════════ -->
+  <!-- Tissue paper frills (wispy, layered) -->
+  <path d="M125,218 Q136,206 147,218 Q158,230 169,218 Q180,206 191,218 Q202,230 213,218 Q224,206 235,218 Q246,230 257,218 Q268,206 279,218 Q290,230 301,218 Q312,206 323,218 Q334,230 335,224 L335,244 L125,244 Z" fill="#ffeaf6" opacity=".78"/>
+  <path d="M120,225 Q132,212 144,225 Q156,238 168,225 Q180,212 192,225 Q204,238 216,225 Q228,212 240,225 Q252,238 264,225 Q276,212 288,225 Q300,238 312,225 Q324,212 336,225 Q338,220 340,228 L340,248 L120,248 Z" fill="#fff4fa" opacity=".72"/>
+  <path d="M115,233 Q128,219 141,233 Q154,247 167,233 Q180,219 193,233 Q206,247 219,233 Q232,219 245,233 Q258,247 271,233 Q284,219 297,233 Q310,247 323,233 Q336,219 342,233 L342,252 L115,252 Z" fill="#fffafd" opacity=".9"/>
+
+  <!-- Paper cone — left shadow flap -->
+  <path d="M127,225 L232,318 L188,318 Z" fill="#6a1030" opacity=".55"/>
+  <!-- Paper cone — right shadow flap -->
+  <path d="M333,225 L228,318 L272,318 Z" fill="#6a1030" opacity=".55"/>
+  <!-- Main wrapper face -->
+  <path d="M127,225 L333,225 L272,318 L188,318 Z" fill="url(#gWrap)"/>
+  <!-- fold panels for depth -->
+  <path d="M175,225 L215,318 L188,318 Z" fill="url(#gWrapS)" opacity=".3"/>
+  <path d="M285,225 L245,318 L272,318 Z" fill="url(#gWrapS)" opacity=".3"/>
+  <!-- highlight sheen center -->
+  <path d="M207,225 L228,318 L253,318 L253,225 Z" fill="rgba(255,150,180,0.08)"/>
+  <!-- crinkle lines -->
+  <line x1="150" y1="225" x2="196" y2="318" stroke="#4a0820" stroke-width=".8" opacity=".28"/>
+  <line x1="180" y1="225" x2="213" y2="318" stroke="#ff90b8" stroke-width=".7" opacity=".14"/>
+  <line x1="210" y1="225" x2="227" y2="318" stroke="#4a0820" stroke-width=".7" opacity=".2"/>
+  <line x1="250" y1="225" x2="233" y2="318" stroke="#4a0820" stroke-width=".7" opacity=".2"/>
+  <line x1="280" y1="225" x2="247" y2="318" stroke="#ff90b8" stroke-width=".7" opacity=".14"/>
+  <line x1="310" y1="225" x2="264" y2="318" stroke="#4a0820" stroke-width=".8" opacity=".28"/>
+  <!-- bottom edge -->
+  <line x1="188" y1="318" x2="272" y2="318" stroke="#580e28" stroke-width="1.5"/>
+  <!-- bottom corner folds -->
+  <path d="M188,318 L170,310 L185,300 L204,315 Z" fill="#7a1238" opacity=".6"/>
+  <path d="M272,318 L290,310 L275,300 L256,315 Z" fill="#7a1238" opacity=".6"/>
+
+  <!-- Ribbon band -->
+  <path d="M125,258 L335,258 L329,275 L131,275 Z" fill="url(#gRib)"/>
+  <!-- Ribbon sheen -->
+  <path d="M132,260 L328,260 L325,267 L135,267 Z" fill="rgba(255,255,255,0.22)"/>
+  <!-- ribbon edge shadow -->
+  <path d="M131,275 L329,275" stroke="#9a3858" stroke-width="1.5"/>
+
+  <!-- Bow — left loop -->
+  <path d="M222,266 C192,250 162,252 167,264 C171,273 202,270 222,266" fill="#ff90bc"/>
+  <path d="M222,266 C200,258 178,260 177,266 C178,270 202,268 222,266" fill="rgba(255,255,255,0.18)"/>
+  <!-- Bow — right loop -->
+  <path d="M238,266 C268,250 298,252 293,264 C289,273 258,270 238,266" fill="#ff90bc"/>
+  <path d="M238,266 C260,258 282,260 283,266 C282,270 258,268 238,266" fill="rgba(255,255,255,0.18)"/>
+  <!-- Bow — inner shadow -->
+  <path d="M222,266 C205,259 182,261 181,266" stroke="#d06090" stroke-width="2" fill="none" opacity=".5"/>
+  <path d="M238,266 C255,259 278,261 279,266" stroke="#d06090" stroke-width="2" fill="none" opacity=".5"/>
+  <!-- Bow — center knot -->
+  <ellipse cx="230" cy="266" rx="13" ry="10" fill="#cc4e80"/>
+  <ellipse cx="230" cy="264" rx="8"  ry="5.5" fill="#ff9ec4"/>
+  <!-- Ribbon tails -->
+  <path d="M224,276 Q213,292 207,306" stroke="#ff90bc" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <path d="M236,276 Q247,292 253,306" stroke="#ff90bc" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <path d="M224,276 Q213,292 207,306" stroke="rgba(255,255,255,0.18)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M236,276 Q247,292 253,306" stroke="rgba(255,255,255,0.18)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  </svg>
+</div>
+
+<script>
+const WORD = 'AKSHATT';
+const ROWS = 6, COLS = 7;
+let curRow = 0, curCol = 0, guess = [];
+let over = false, ks = {};
+let revealed = new Array(COLS).fill(false);
+let fCount = 0;
+
+// Bloom order (visual z-back-to-front in SVG: f5,f4,f2,f3,f6,f7,f1)
+// Bloom trigger order: first correct letter → f1 (center rose), then f4, f2, f3, f6, f7, f5
+const BLOOM_ORDER = ['f1','f4','f2','f3','f6','f7','f5'];
+
+// BUILD GRID
+const gridEl = document.getElementById('grid');
+for (let r = 0; r < ROWS; r++) {
+  const row = document.createElement('div'); row.className='row'; row.id='r'+r;
+  for (let c = 0; c < COLS; c++) {
+    const t = document.createElement('div'); t.className='tile'; t.id='t'+r+c;
+    row.appendChild(t);
+  }
+  gridEl.appendChild(row);
+}
+
+// BUILD KEYBOARD
+const KB=[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['ENTER','Z','X','C','V','B','N','M','⌫']];
+const kbEl = document.getElementById('keyboard');
+KB.forEach(kr=>{
+  const d=document.createElement('div'); d.className='kb-row';
+  kr.forEach(k=>{
+    const b=document.createElement('button');
+    b.className='key'+(k.length>1?' wide':''); b.textContent=k; b.dataset.k=k;
+    b.addEventListener('click',()=>key(k));
+    d.appendChild(b);
+  });
+  kbEl.appendChild(d);
+});
+
+let mTm;
+function msg(t,perm){
+  clearTimeout(mTm);
+  document.getElementById('msg').textContent=t;
+  if(!perm) mTm=setTimeout(()=>document.getElementById('msg').textContent='',2400);
+}
+
+function key(k){
+  if(over) return;
+  if(k==='⌫'||k==='BACKSPACE'){
+    if(curCol>0){curCol--;guess.pop();const t=document.getElementById('t'+curRow+curCol);t.textContent='';t.classList.remove('has-letter');}
+    return;
+  }
+  if(k==='ENTER'){submit();return;}
+  const L=k.toUpperCase();
+  if(/^[A-Z]$/.test(L)&&curCol<COLS){
+    const t=document.getElementById('t'+curRow+curCol);
+    t.textContent=L;t.classList.add('has-letter');guess.push(L);curCol++;
+  }
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key==='Backspace') key('BACKSPACE');
+  else if(e.key==='Enter') key('ENTER');
+  else key(e.key.toUpperCase());
+});
+
+function shake(){
+  const row=document.getElementById('r'+curRow);
+  row.classList.add('shaking');
+  setTimeout(()=>row.classList.remove('shaking'),370);
+}
+
+function submit(){
+  if(curCol<COLS){shake();msg('Not enough letters!');return;}
+  const g=guess.join('');
+  const res=evaluate(g);
+
+  // ── NEVER WIN ON FIRST TRY ──
+  if(curRow===0 && res.every(x=>x==='correct')){
+    shake();
+    msg("Nice try 😏 The game's no fun on the first guess — think a little harder!");
+    return;
+  }
+
+  revealRow(res,g,()=>{
+    if(res.every(x=>x==='correct')){
+      over=true;
+      const remaining=COLS-fCount;
+      for(let i=0;i<remaining;i++) setTimeout(()=>bloomFlower(),i*380);
+      setTimeout(()=>{
+        msg('You found it! 💕',true);
+        setTimeout(()=>document.getElementById('win').classList.add('show'),950);
+      },500);
+    } else {
+      curRow++;curCol=0;guess=[];
+      if(curRow>=ROWS){over=true;msg('The answer is AKSHATT 💕 — the one who loves you most.',true);}
+    }
+  });
+}
+
+function evaluate(g){
+  const res=Array(COLS).fill('absent');
+  const ans=WORD.split(''),gg=g.split('');
+  for(let i=0;i<COLS;i++) if(gg[i]===ans[i]){res[i]='correct';ans[i]=null;gg[i]=null;}
+  for(let i=0;i<COLS;i++) if(gg[i]!==null){const idx=ans.indexOf(gg[i]);if(idx!==-1){res[i]='present';ans[idx]=null;}}
+  return res;
+}
+
+const pri={correct:3,present:2,absent:1};
+
+function revealRow(res,g,done){
+  for(let i=0;i<COLS;i++){
+    const t=document.getElementById('t'+curRow+i);
+    const delay=i*300;
+    setTimeout(()=>{
+      t.style.transition='transform .2s ease-in';
+      t.style.transform='scaleY(0)';
+      setTimeout(()=>{
+        t.classList.add(res[i]);
+        t.style.transition='transform .2s ease-out';
+        t.style.transform='scaleY(1)';
+        setTimeout(()=>{t.style.transition='';t.style.transform='';},200);
+        const L=g[i];
+        const cur=ks[L];
+        if((pri[res[i]]||0)>(pri[cur]||0)){
+          ks[L]=res[i];
+          const btn=document.querySelector('.key[data-k="'+L+'"]');
+          if(btn){btn.className='key'+(btn.classList.contains('wide')?' wide':'')+' '+res[i];}
+        }
+        if(res[i]==='correct'&&!revealed[i]){
+          revealed[i]=true;
+          setTimeout(()=>bloomFlower(),350);
+        }
+        if(i===COLS-1) setTimeout(done,360);
+      },200);
+    },delay);
+  }
+}
+
+function bloomFlower(){
+  if(fCount>=BLOOM_ORDER.length) return;
+  const id=BLOOM_ORDER[fCount];
+  const grp=document.getElementById(id);
+  if(!grp) return;
+  grp.setAttribute('visibility','visible');
+  const inner=grp.querySelector('.fblm');
+  if(inner){inner.classList.remove('go');void inner.offsetWidth;inner.classList.add('go');}
+  fCount++;
+  if(fCount===1) document.getElementById('bqcap').classList.add('show');
+  if(fCount===BLOOM_ORDER.length){
+    setTimeout(()=>{document.getElementById('bqcap').textContent='Your bouquet is complete 🌹💐';},1200);
+  }
+}
+</script>
+</body>
+</html>
